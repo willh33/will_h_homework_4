@@ -1,5 +1,5 @@
-let startButton = document.getElementById('start-button')
-let timerEl = document.getElementById('timer');
+let startButton = document.getElementById('start-btn')
+let timerEl = document.getElementById('timer-span');
 let totalSeconds = 75;
 let secondsElapsed = 0;
 
@@ -14,7 +14,8 @@ let answers = [
 	['strings', 'booleans', 'alerts', 'numbers'],
 	['quotes', 'curly brackets', 'parenthesis', 'square brackets'],
 	['numbers and strings', 'other arrays', 'booleans', 'all of the above'],
-	['commas', '']
+	['commas', 'curly brackets', 'quotes', 'parenthesis'],
+	['JavaScript', 'terminal / bash', 'for loops', 'console log']
 ];
 
 /**
@@ -23,6 +24,8 @@ let answers = [
 function startQuiz() {
 	//Start timer
 	interval = setInterval(tick, 1000);
+	
+	
 }
 
 /**
