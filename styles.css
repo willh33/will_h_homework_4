@@ -6,6 +6,31 @@
 	background-color: #5c18c1;
 }
 
-#view-highscores:hover {
-	color: #5c18c1;
+.bg-purple:hover {
+	background-color: #a66bff;
+}
+
+.purple-font:hover {
+	color: #a66bff;
+}
+
+.round-border {
+	border-radius: 5px;
+}
+
+.hide {
+	display: none;
+}
+
+.show {
+	display: block;
+}
+
+.submit-initial {
+	height: 38px;
+
+}
+
+label {
+	width: 150px;
 }
