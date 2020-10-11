@@ -1,13 +1,15 @@
 let startButton = document.getElementById('start-btn')
+let viewScoresButton = document.getElementById('view-highscores')
 let timerEl = document.getElementById('timer-span');
 let questionTextEl = document.getElementById('question-text');
 let answerOptionsDiv = document.getElementById('multiple-choices-div');
 let buttonDiv = document.getElementById('button-div');
-let wrongAnswerEl = document.getElementById('wrong-answer-text');
+let wrongAnswerEl;
 let totalSeconds = 75;
 let secondsElapsed = 0;
 let currentQuestion = 0;
 let interval;
+let score = 0;
 
 let questionsAndAnswers = [
 	{
@@ -42,9 +44,23 @@ let questionsAndAnswers = [
  */
 function startQuiz() {
 	//Start timer
+	totalSeconds = 75;
+	secondsElapsed = 0;
+	currentQuestion = 0;
 	interval = setInterval(tick, 1000);	
-	setQuestionAndAnswerText();
 	questionTextEl.classList.remove('text-center');
+
+	let answerText = document.createElement('div');
+	answerText.setAttribute('id', 'wrong-answer-text');
+	answerText.classList.add('d-none');
+	answerText.classList.add('border-top');
+	answerText.classList.add('text-muted');
+	answerText.classList.add('font-italic');
+	
+	wrongAnswerEl = answerText;
+	answerOptionsDiv.append(wrongAnswerEl);
+
+	setQuestionAndAnswerText();
 }
 
 /**
@@ -57,6 +73,9 @@ function tick() {
 
 	//Update the timer element to display the seconds left
 	timerEl.textContent = totalSecondsLeft;
+	if(totalSecondsLeft <= 0) {
+		endQuiz();
+	}
 }
 
 /**
@@ -70,10 +89,9 @@ function setQuestionAndAnswerText() {
 	let question = questionsAndAnswers[currentQuestion];
 	questionTextEl.textContent = question.question;
 
-	answerOptionsDiv.children[0].style.display = 'none';
+	answerOptionsDiv.children[0].classList.add('d-none');
 
 	let btnDiv = document.createElement('div');
-	btnDiv.classList.add('row');
 	btnDiv.setAttribute('id', 'btn-div');
 
 	//append a button to the page for each answer
@@ -81,9 +99,11 @@ function setQuestionAndAnswerText() {
 	{
 
 		let btn = document.createElement('button');
-		btn.classList.add('bg-purple');
-		btn.classList.add('text-white');
-		btn.classList.add('round-border');
+		addClassesToButton(btn);
+		btn.classList.add('row');
+		// btn.classList.add('bg-purple');
+		// btn.classList.add('text-white');
+		// btn.classList.add('round-border');
 		btn.classList.add('answer');
 		btn.textContent = (i + 1) + '. ' + question.answers[i];
 		btn.setAttribute('data-answer', i);
@@ -93,7 +113,7 @@ function setQuestionAndAnswerText() {
 	}
 
 	answerOptionsDiv.insertBefore(btnDiv, wrongAnswerEl);
-	startButton.style.display = 'none';
+	startButton.classList.add('d-none');
 }
 
 function resetQuestionAndAnswers() {
@@ -113,11 +133,11 @@ function resetQuestionAndAnswers() {
 function checkAnswer(event) {
 	let btnClicked = event.currentTarget;
 	let answer = btnClicked.getAttribute('data-answer');
-	console.log(btnClicked);
 	let question = questionsAndAnswers[currentQuestion];
 	if(parseInt(answer) !== question.correctAnswer)
 	{
 		totalSeconds -= 10;
+		timerEl.textContent = totalSeconds - secondsElapsed;
 		wrongAnswerEl.textContent = 'Wrong!';
 	}
 	else
@@ -142,9 +162,11 @@ function checkAnswer(event) {
  * @param {*} event 
  */
 function endQuiz(event) {
+	//set the score
+	score = totalSeconds - secondsElapsed;
 	//Set the text
 	questionTextEl.textContent = 'All Done!';
-	answerOptionsDiv.textContent = 'Your final score is ' + (totalSeconds - secondsElapsed) + '.';
+	answerOptionsDiv.textContent = 'Your final score is ' + score + '.';
 
 	//Stop the timer
 	clearInterval(interval);
@@ -163,6 +185,7 @@ function endQuiz(event) {
 	initialLabel.classList.add('mt-2');
 
 	initialInput.classList.add('form-control');
+	initialInput.setAttribute('id', 'initial-input');
 
 	initialSubmit.classList.add('bg-purple');
 	initialSubmit.classList.add('text-white');
@@ -182,7 +205,100 @@ function endQuiz(event) {
 }
 
 function saveScore() {
+	//Get the initials from the input
+	let input = document.getElementById('initial-input');
 
+	//save initials and score to localStorage
+	addScoreToLocalStorage(input.value, score)
+}
+
+function addScoreToLocalStorage(initials, score) {
+	//Get the scores from localStorage
+	let scores = localStorage.scores;
+	if(scores)
+		scores = JSON.parse(scores);
+	else 
+		scores = [];
+
+	//Add new entry to the array
+	scores.push({initial: initials, score: score});
+
+	//Sort the array by score
+	scores.sort((a, b) => {
+		return b.score - a.score;
+	});
+	localStorage.scores = JSON.stringify(scores);
+	showHighScores();
+}
+
+function showHighScores() {
+	//Get the Highscores from localStorage
+	let highScores = localStorage.scores;
+	startButton.classList.add("d-none");
+	if(highScores)
+		highScores = JSON.parse(highScores);
+	else
+		highScores = [];
+
+	//Set the content
+	questionTextEl.textContent = 'Highscores';
+
+	let scoreLi = document.createElement('ol');
+
+	//Add the high scores
+	for(let i = 0; i < highScores.length; i++)
+	{
+		let score = highScores[i];
+		let li = document.createElement('li');
+		li.textContent = score.initial + ' - ' + score.score;
+		li.classList.add('list-group-item-secondary');
+		li.classList.add('list-group-item');
+		scoreLi.append(li);
+	}
+
+	//Append them to the DOM
+	answerOptionsDiv.textContent = "";
+	answerOptionsDiv.append(scoreLi);
+
+	//Add the Go Back Button and Clear Highscores button
+	let btn = document.createElement('button');
+	btn.textContent = 'Go Back';
+	addClassesToButton(btn);
+	btn.setAttribute('id', 'back-button');
+	btn.addEventListener('click', resetPage);
+
+	answerOptionsDiv.append(btn);
+
+	btn = document.createElement('button');
+	btn.textContent = 'Clear Highscores';
+	addClassesToButton(btn);
+	btn.setAttribute('id', 'clear-scores');
+	btn.addEventListener('click', clearHighscores);
+
+	answerOptionsDiv.append(btn);
+}
+
+function clearHighscores() {
+	localStorage.scores = "";
+	showHighScores();
+}
+
+function addClassesToButton(button) {
+	button.classList.add('bg-purple');
+	button.classList.add('text-white');
+	button.classList.add('round-border');
+}
+
+function resetPage() {
+	questionTextEl.classList.add('text-center');
+	questionTextEl.textContent = 'Coding Quiz Challenge';
+
+	answerOptionsDiv.textContent = "";
+	let p = document.createElement('p');
+	p.textContent = 'Try to answer the following code-related questions within the time limit. Keep in mind incorrect answers will penalize your score / time by 10 seconds!';
+	answerOptionsDiv.append(p);
+	startButton.classList.remove('d-none');
 }
 
 startButton.addEventListener("click", startQuiz);
+viewScoresButton.addEventListener("click", showHighScores);
