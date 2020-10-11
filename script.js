@@ -134,6 +134,8 @@ function checkAnswer(event) {
 	let btnClicked = event.currentTarget;
 	let answer = btnClicked.getAttribute('data-answer');
 	let question = questionsAndAnswers[currentQuestion];
+
+	//Check if they got the write answer
 	if(parseInt(answer) !== question.correctAnswer)
 	{
 		totalSeconds -= 10;
@@ -147,6 +149,7 @@ function checkAnswer(event) {
 
 	setTimeout(function(){ wrongAnswerEl.classList.add('d-none'); }, 1000);
 
+	//Check if we're on the last question and ready to end the quiz
 	if(currentQuestion !== questionsAndAnswers.length - 1)
 	{
 		currentQuestion++;
@@ -196,6 +199,7 @@ function endQuiz(event) {
 
 	initialSubmit.addEventListener('click', saveScore);
 
+	//Append the initial elements to the DOM
 	initialDiv.append(initialLabel);
 	initialDiv.append(initialInput);
 	initialDiv.append(initialSubmit);
@@ -204,6 +208,9 @@ function endQuiz(event) {
 	//on submit save score and initial to localStorage and go to HighScores page
 }
 
+/**
+ * Save the score to localStorage
+ */
 function saveScore() {
 	//Get the initials from the input
 	let input = document.getElementById('initial-input');
@@ -212,6 +219,11 @@ function saveScore() {
 	addScoreToLocalStorage(input.value, score)
 }
 
+/**
+ * Add the score to the localStorage scores array
+ * @param {*} initials 
+ * @param {*} score 
+ */
 function addScoreToLocalStorage(initials, score) {
 	//Get the scores from localStorage
 	let scores = localStorage.scores;
@@ -231,6 +243,9 @@ function addScoreToLocalStorage(initials, score) {
 	showHighScores();
 }
 
+/**
+ * Get the highscores from localstorage and append them to the DOM in a list
+ */
 function showHighScores() {
 	//Get the Highscores from localStorage
 	let highScores = localStorage.scores;
@@ -260,7 +275,7 @@ function showHighScores() {
 	answerOptionsDiv.textContent = "";
 	answerOptionsDiv.append(scoreLi);
 
-	//Add the Go Back Button and Clear Highscores button
+	//Create a back button
 	let btn = document.createElement('button');
 	btn.textContent = 'Go Back';
 	addClassesToButton(btn);
@@ -269,6 +284,7 @@ function showHighScores() {
 
 	answerOptionsDiv.append(btn);
 
+	//Create a button to clear the scores
 	btn = document.createElement('button');
 	btn.textContent = 'Clear Highscores';
 	addClassesToButton(btn);
@@ -278,21 +294,33 @@ function showHighScores() {
 	answerOptionsDiv.append(btn);
 }
 
+/**
+ * Clear the highscores tthen call the method to show the scores
+ */
 function clearHighscores() {
 	localStorage.scores = "";
 	showHighScores();
 }
 
+/**
+ * Add classes to the button to make it have a purple background and white text
+ * @param {} button 
+ */
 function addClassesToButton(button) {
 	button.classList.add('bg-purple');
 	button.classList.add('text-white');
 	button.classList.add('round-border');
 }
 
+/**
+ * Reset the page back to the start before clicking start quiz
+ */
 function resetPage() {
+	//Reset the header text
 	questionTextEl.classList.add('text-center');
 	questionTextEl.textContent = 'Coding Quiz Challenge';
 
+	//Reset to the beginning text
 	answerOptionsDiv.textContent = "";
 	let p = document.createElement('p');
 	p.textContent = 'Try to answer the following code-related questions within the time limit. Keep in mind incorrect answers will penalize your score / time by 10 seconds!';
